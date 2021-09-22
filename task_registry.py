@@ -1,0 +1,66 @@
+import functools
+import warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+import tensorflow.compat.v1 as tf
+
+import t5
+import seqio
+import functools as ft
+
+DEFAULT_SPM_PATH = "gs://t5-data/vocabs/mc4.250000.100extra/sentencepiece.model"
+DEFAULT_VOCAB = t5.data.SentencePieceVocabulary(DEFAULT_SPM_PATH)
+
+DEFAULT_OUTPUT_FEATURES = {
+    "inputs": t5.data.Feature(vocabulary=DEFAULT_VOCAB, add_eos=True),
+    "targets": t5.data.Feature(vocabulary=DEFAULT_VOCAB, add_eos=True),
+}
+
+
+def tsv_dataset_fn(file_paths, split, shuffle_files=False):
+    ds = tf.data.TextLineDataset(file_paths[split])
+    ds = ds.map(
+        functools.partial(
+            tf.io.decode_csv,
+            record_defaults=["", ""],
+            field_delim="\t",
+            use_quote_delim=False,
+        ),
+        num_parallel_calls=tf.data.experimental.AUTOTUNE,
+    )
+    ds = ds.map(lambda *ex: dict(zip(["inputs", "targets"], ex)))
+    return ds
+
+
+def register_tsv_datasets(task_name, ds_paths):
+    example_count = {}
+    for split, path in ds_paths.items():
+        with tf.io.gfile.GFile(path) as f:
+            example_count[split] = len(f.readlines())
+
+    seqio.TaskRegistry.add(
+        task_name,
+        source=seqio.FunctionDataSource(
+            dataset_fn=ft.partial(tsv_dataset_fn, ds_paths),
+            splits=list(ds_paths),
+            num_input_examples=example_count,
+        ),
+        preprocessors=[
+            seqio.preprocessors.tokenize,
+            seqio.CacheDatasetPlaceholder(),
+            seqio.preprocessors.append_eos_after_trim,
+        ],
+        output_features=DEFAULT_OUTPUT_FEATURES,
+        metric_fns=[],
+    )
+
+
+def register_datasets(datasets):
+    for dataset in datasets:
+        if "splits" in dataset:
+            register_tsv_datasets(dataset.name, dataset.splits)
+        elif "mixture" in dataset:
+            seqio.MixtureRegistry.add(dataset.name, dataset.mixture, default_rate=1.0)
+        else:
+            raise ValueError("Invalid dataset")

@@ -1,0 +1,8 @@
+# @package __global__
+model:
+  model_parallelism: 2
+  batch_size: 128
+  learning_rate_schedule: 0.003
+  iterations_per_loop: 100
+
+pretrained_dir: gs://t5-data/pretrained_models/mt5/base/
