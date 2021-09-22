@@ -1,0 +1,22 @@
+# @package __global__
+model:
+  sequence_length:
+    inputs: 512
+    targets: 32
+  save_checkpoints_steps: 3500
+  keep_checkpoint_max: 20
+
+datasets:
+  - name: polish_qa
+    splits:
+      train: gs://trc-playground/polish_qa/data/dev_test_a_lemma.tsv
+  - name: trivia_qa_en
+    splits:
+      train: gs://trc-playground/polish_qa/data/tydiqa_30000_noup.tsv
+  - name: pl_en_qa
+    mixture:
+      - polish_qa
+      - trivia_qa_en
+
+train_task: pl_en_qa
+finetune_steps: 30000

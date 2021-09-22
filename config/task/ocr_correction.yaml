@@ -1,0 +1,15 @@
+# @package __global__
+model:
+  sequence_length:
+    inputs: 384
+    targets: 384
+  save_checkpoints_steps: 10000
+  keep_checkpoint_max: 20
+
+datasets:
+  - name: ocr_correction
+    splits:
+      train: gs://trc-playground/ocr_correction/data/ocr_train.tsv
+
+finetune_steps: 100000
+train_task: ocr_correction
