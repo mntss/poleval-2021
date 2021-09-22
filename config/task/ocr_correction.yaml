@@ -1,0 +1,20 @@
+# @package __global__
+model:
+  sequence_length:
+    inputs: 384
+    targets: 384
+  save_checkpoints_steps: 20000
+  keep_checkpoint_max: 20
+
+datasets:
+  - name: ocr_correction
+    splits:
+      train: ${gs_base_path}/data/ocr/train-input-384.tsv
+
+finetune_steps: 200000
+train_task: ocr_correction
+
+predict_files:
+  - ${gs_base_path}/data/ocr/dev-0-input-384.txt
+  - ${gs_base_path}/data/ocr/test-A-input-384.txt
+  - ${gs_base_path}/data/ocr/test-B-input-384.txt
