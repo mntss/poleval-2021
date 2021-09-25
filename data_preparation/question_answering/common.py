@@ -1,7 +1,25 @@
 import sentencepiece as spm
 import numpy as np
+from elasticsearch import helpers
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel("INFO")
 
 t5_tokenizer = spm.SentencePieceProcessor(model_file="sentencepiece.model")  # type: ignore
+
+
+def prepare_es_index(es, index_name, index_config, generator_fn):
+    logger.info("Creating target index")
+    es.indices.create(index=index_name, body=index_config)
+
+    logger.info("Indexing wikipedia")
+    paragraphs = generator_fn(index_name)
+    success, errors = helpers.bulk(es, paragraphs, stats_only=True)
+
+    logger.info("Indexed %d wikipedia passages", success)
+    if errors:
+        logger.warning("Failed to index %d passages", errors)
 
 
 def token_length(text):
