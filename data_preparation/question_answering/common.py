@@ -6,6 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel("INFO")
 
+# TODO gs://t5-data/vocabs/mc4.250000.100extra/sentencepiece.model
 t5_tokenizer = spm.SentencePieceProcessor(model_file="sentencepiece.model")  # type: ignore
 
 

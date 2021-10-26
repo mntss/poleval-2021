@@ -3,7 +3,7 @@ import logging
 import hydra
 import t5
 import tensorflow.compat.v1 as tf
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 import t5.models
 from task_registry import register_datasets, DEFAULT_VOCAB
 

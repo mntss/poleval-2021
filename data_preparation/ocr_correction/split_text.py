@@ -1,3 +1,4 @@
+import argparse
 import difflib
 import logging
 import lzma
@@ -10,6 +11,7 @@ from tqdm import tqdm
 
 tqdm.pandas()
 
+# TODO gs://t5-data/vocabs/mc4.250000.100extra/sentencepiece.model
 tokenizer = spm.SentencePieceProcessor(model_file="sentencepiece.model")  # type: ignore
 
 
@@ -185,5 +187,19 @@ def main(base_dir, length_limit, match_threshold):
 
 
 if __name__ == "__main__":
-    base_dir = "/Users/mateusz.piotrowski/Repositories/2021-ocr-correction"
-    main("/Users/mateusz.piotrowski/Repositories/2021-ocr-correction", 384, 20)
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("base_dir", help="OCR task repository directory")
+    parser.add_argument(
+        "--length-limit", type=int, default=384, help="Maximum example length"
+    )
+    parser.add_argument(
+        "--match-threshold",
+        type=int,
+        default=20,
+        help="Minimum match length to consider a split",
+    )
+
+    args = parser.parse_args()
+
+    main(**vars(args))

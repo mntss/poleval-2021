@@ -1,3 +1,4 @@
+import argparse
 import logging
 
 import pandas as pd
@@ -29,7 +30,7 @@ def wiki_paragraph_generator(index_name):
 
     seen = set()
 
-    for doc in tqdm(ds.as_numpy_iterator(), total=info.splits["train"].num_examples):
+    for doc in tqdm(ds.as_numpy_iterator()):
         doc_hash = hash(doc["wiki_context"])
         if doc_hash in seen:
             continue
@@ -44,9 +45,6 @@ def wiki_paragraph_generator(index_name):
         seen.add(doc_hash)
 
 
-idx = "wiki_en_test"
-
-
 def create_train_data(length_limit):
     ds_qa, info = tfds.load("trivia_qa/unfiltered", split="train", with_info=True)
     train_data = []
@@ -57,8 +55,6 @@ def create_train_data(length_limit):
             body={"query": {"match": {"paragraph": q}}},
         )
 
-    ds_qa = ds_qa.take(1000)  # remove limit
-
     num_examples = info.splits["train"].num_examples
     for doc in tqdm(ds_qa.as_numpy_iterator(), total=num_examples):
         question = doc["question"].decode("utf-8")
@@ -68,7 +64,7 @@ def create_train_data(length_limit):
 
         train_data.append(
             {
-                "inputs": inputs.replace('\n', ' '),
+                "inputs": inputs.replace("\n", " "),
                 "targets": doc["answer"]["value"].decode("utf-8"),
             }
         )
@@ -94,4 +90,15 @@ def main(index_name, length_limit):
 
 
 if __name__ == "__main__":
-    main(idx, 512)
+    parser = argparse.ArgumentParser(
+        description="Prepare prompt-answer pairs from TriviaQA dataset"
+    )
+
+    parser.add_argument("index_name", help="Elasticsearch index name")
+    parser.add_argument(
+        "--length-limit", type=int, default=510, help="Maximum prompt length"
+    )
+
+    args = parser.parse_args()
+
+    main(**vars(args))

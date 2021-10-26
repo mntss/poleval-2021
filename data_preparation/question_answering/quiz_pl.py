@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 
@@ -8,6 +9,10 @@ from elasticsearch import Elasticsearch
 from tqdm import tqdm
 
 from data_preparation.question_answering.common import make_inputs, prepare_es_index
+
+logging.basicConfig(format="%(asctime)s [%(levelname)-8s] %(message)s")
+logger = logging.getLogger(__name__)
+logger.setLevel("INFO")
 
 WIKI_PL_INDEX = {
     "settings": {
@@ -27,11 +32,8 @@ WIKI_PL_INDEX = {
         }
     },
 }
-es = Elasticsearch(os.environ.get("ELASTIC_HOST"))
 
-logging.basicConfig(format="%(asctime)s [%(levelname)-8s] %(message)s")
-logger = logging.getLogger(__name__)
-logger.setLevel("INFO")
+es = Elasticsearch(os.environ.get("ELASTIC_HOST"))
 
 
 def extract_valid_paragraphs(doc, min_length=20):
@@ -162,8 +164,13 @@ def main(base_dir, index_name, length_limit):
 
 
 if __name__ == "__main__":
-    main(
-        "/Users/mateusz.piotrowski/Repositories/2021-question-answering",
-        "wiki_pl_test",
-        510,
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("base_dir", help="Directory of QA repository")
+    parser.add_argument("index_name", help="Elasticsearch index name")
+    parser.add_argument(
+        "--length-limit", type=int, default=510, help="Maximum prompt length"
     )
+
+    args = parser.parse_args()
+    main(**vars(args))

@@ -2,5 +2,7 @@ defaults:
   - model: xxl
   - task: question_answering
 
-gs_base_path: gs://trc-playground
-model_dir: ${gs_base_path}/${hydra:runtime.choices.task}/models/${hydra:runtime.choices.model}
+gs_base_path: gs://fill-me  # TODO
+
+suffix: ''
+model_dir: ${gs_base_path}/${hydra:runtime.choices.task}/models_v2/${hydra:runtime.choices.model}${suffix}

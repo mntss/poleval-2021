@@ -3,13 +3,18 @@ model:
   sequence_length:
     inputs: 384
     targets: 384
-  save_checkpoints_steps: 10000
+  save_checkpoints_steps: 20000
   keep_checkpoint_max: 20
 
 datasets:
   - name: ocr_correction
     splits:
-      train: gs://trc-playground/ocr_correction/data/ocr_train.tsv
+      train: ${gs_base_path}/data/ocr/train-input-384.tsv
 
-finetune_steps: 100000
+finetune_steps: 200000
 train_task: ocr_correction
+
+predict_files:
+  - ${gs_base_path}/data/ocr/dev-0-input-384.txt
+  - ${gs_base_path}/data/ocr/test-A-input-384.txt
+  - ${gs_base_path}/data/ocr/test-B-input-384.txt
