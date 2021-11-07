@@ -11,8 +11,11 @@ from tqdm import tqdm
 
 tqdm.pandas()
 
+sentencepiece_model = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../../sentencepiece.model")
+)
 # TODO gs://t5-data/vocabs/mc4.250000.100extra/sentencepiece.model
-tokenizer = spm.SentencePieceProcessor(model_file="sentencepiece.model")  # type: ignore
+tokenizer = spm.SentencePieceProcessor(model_file=sentencepiece_model)  # type: ignore
 
 
 logging.basicConfig(level="INFO", format="%(asctime)s [%(levelname)-8s] %(message)s")

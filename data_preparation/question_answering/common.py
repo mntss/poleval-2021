@@ -1,3 +1,4 @@
+import os
 import sentencepiece as spm
 import numpy as np
 from elasticsearch import helpers
@@ -6,8 +7,10 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel("INFO")
 
-# TODO gs://t5-data/vocabs/mc4.250000.100extra/sentencepiece.model
-t5_tokenizer = spm.SentencePieceProcessor(model_file="sentencepiece.model")  # type: ignore
+sentencepiece_model = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../../sentencepiece.model")
+)
+t5_tokenizer = spm.SentencePieceProcessor(model_file=sentencepiece_model)  # type: ignore
 
 
 def prepare_es_index(es, index_name, index_config, generator_fn):
